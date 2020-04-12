@@ -33,7 +33,7 @@ class Dataset(data.Dataset):
             for file in os.listdir(dir):
                 self.paths.append(dir+'/'+file)
 
-        self.labels = [label_dict[path[6:]] for path in self.paths]
+        self.labels = [label_dict[path[len(PATH)+6:]] for path in self.paths]
 
         neg_weight = np.mean(self.labels)
         self.weights = [neg_weight, 1 - neg_weight]
