@@ -11,6 +11,7 @@ INPUT_DIM = 224
 MAX_PIXEL_VAL = 255
 MEAN = 58.09
 STDDEV = 49.73
+PATH = 'external_validation/'
 
 class Dataset(data.Dataset):
     def __init__(self, datadirs, diagnosis, use_gpu):
@@ -20,7 +21,7 @@ class Dataset(data.Dataset):
         label_dict = {}
         self.paths = []
 
-        for i, line in enumerate(open('metadata.csv').readlines()):
+        for i, line in enumerate(open(PATH+'metadata.csv').readlines()):
             if i == 0:
                 continue
             line = line.strip().split(',')
@@ -75,6 +76,10 @@ def load_data(diagnosis, use_gpu=False):
     train_dirs = ['vol08','vol04','vol03','vol09','vol06','vol07']
     valid_dirs = ['vol10','vol05']
     test_dirs = ['vol01','vol02']
+    
+    train_dirs = [PATH + path for path in train_dirs]
+    valid_dirs = [PATH + path for path in valid_dirs]
+    test_dirs = [PATH + path for path in test_dirs]
     
     train_dataset = Dataset(train_dirs, diagnosis, use_gpu)
     valid_dataset = Dataset(valid_dirs, diagnosis, use_gpu)
