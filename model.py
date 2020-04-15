@@ -6,7 +6,7 @@ from torchvision import models
 
 class MRNet(nn.Module):
     def __init__(self, useMultiHead = True, num_sublayers = 2, num_heads = 8,
-                 hidden_dim = 256, dim_feedforward = 512, dim_kq = None, dim_v = None):
+                 hidden_dim = 256, dim_feedforward = 512, dim_kq = None, dim_v = None, max_layers = 45):
         super().__init__()
         self.model = models.alexnet(pretrained=True)
         self.classifier = nn.Linear(256, 1)
@@ -14,22 +14,31 @@ class MRNet(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d(1)
         if useMultiHead:
             self.attention = Attention(num_sublayers, num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v)
-            #self.classifier = nn.Linear(256 * 30, 1)
+            self.classifier = nn.Linear(256 * max_layers, 1)
+            self.max_layers = max_layers
 
     def forward(self, x):
-        print(x.shape)
         x = torch.squeeze(x, dim=0) # only batch size 1 supported
         x = self.model.features(x)
-        print(x.shape)
-        print("Next")
         x = self.gap(x).view(x.size(0), -1)
         if self.useMultiHead:
+
             x = x.view(x.size(0), 1, -1)
-            x = self.attention(x).view(x.size(0), -1)
 
-        x = torch.max(x, 0, keepdim=True)[0]
-        x = self.classifier(x)
+            if x.size(0) < self.max_layers:
+                newShape = list(x.shape)
+                newShape[0] = self.max_layers
+                newX = torch.zeros(newShape)
+                newX[: x.size(0), :, :] = x
+                x = newX
 
+            x = self.attention(x).view(1, -1)
+            x = self.classifier(x)
+        else:
+            x = torch.max(x, 0, keepdim=True)[0]
+            x = self.classifier(x)
+
+        print("done")
         return x
 
 class Attention(nn.Module):
