@@ -1,0 +1,12 @@
+{
+    "rundir": "replicate_study_mrnet0",
+    "diagnosis": 1,
+    "seed": 42,
+    "gpu": false,
+    "learning_rate": 1e-05,
+    "weight_decay": 0.01,
+    "epochs": 50,
+    "max_patience": 5,
+    "factor": 0.3,
+    "dataset": 1
+}
