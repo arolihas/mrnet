@@ -9,44 +9,53 @@ from pathlib import Path
 from sklearn import metrics
 
 from evaluate import run_model
-from loader import load_data
+from loader import external_load_data, mr_load_data
 from model import MRNet
 
-def train(rundir, diagnosis, epochs, learning_rate, use_gpu):
-    train_loader, valid_loader, test_loader = load_data(diagnosis, use_gpu)
-    
-    model = MRNet()
-    
-    if use_gpu:
-        model = model.cuda()
+def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
+    models = []
+    if (dataset == 0):
+        train_loader, valid_loader, test_loader = external_load_data(diagnosis, use_gpu)
+        models.append((MRNet(), train_loader, valid_loader, 'external_validation'))
+    elif (dataset == 1):
+        train_loaders, valid_loaders = mr_load_data(diagnosis)
+        train_loader_sag, train_loader_ax, train_loader_cor = train_loaders
+        valid_loader_sag, valid_loader_ax, valid_loader_cor = valid_loaders
+        models = [(MRNet(), train_loader_sag, valid_loader_sag, 'sagittal'),
+                  (MRNet(), train_loader_ax, valid_loader_ax, 'axial'),
+                  (MRNet(), train_loader_cor, valid_loader_cor, 'coronal')]
 
-    optimizer = torch.optim.Adam(model.parameters(), learning_rate, weight_decay=.01)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=.3, threshold=1e-4)
+    for model, train_loader, valid_loader, fname in models:
+        if use_gpu:
+            model = model.cuda()
 
-    best_val_loss = float('inf')
+        optimizer = torch.optim.Adam(model.parameters(), learning_rate, weight_decay=.01)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=.3, threshold=1e-4)
 
-    start_time = datetime.now()
+        best_val_loss = float('inf')
 
-    for epoch in range(epochs):
-        change = datetime.now() - start_time
-        print('starting epoch {}. time passed: {}'.format(epoch+1, str(change)))
-        
-        train_loss, train_auc, _, _ = run_model(model, train_loader, train=True, optimizer=optimizer)
-        print(f'train loss: {train_loss:0.4f}')
-        print(f'train AUC: {train_auc:0.4f}')
+        start_time = datetime.now()
 
-        val_loss, val_auc, _, _ = run_model(model, valid_loader)
-        print(f'valid loss: {val_loss:0.4f}')
-        print(f'valid AUC: {val_auc:0.4f}')
+        for epoch in range(epochs):
+            change = datetime.now() - start_time
+            print('starting epoch {}. time passed: {}'.format(epoch+1, str(change)))
+            
+            train_loss, train_auc, _, _ = run_model(model, train_loader, train=True, optimizer=optimizer)
+            print(f'train loss: {train_loss:0.4f}')
+            print(f'train AUC: {train_auc:0.4f}')
 
-        scheduler.step(val_loss)
+            val_loss, val_auc, _, _ = run_model(model, valid_loader)
+            print(f'valid loss: {val_loss:0.4f}')
+            print(f'valid AUC: {val_auc:0.4f}')
 
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
+            scheduler.step(val_loss)
 
-            file_name = f'val{val_loss:0.4f}_train{train_loss:0.4f}_epoch{epoch+1}'
-            save_path = Path(rundir) / file_name
-            torch.save(model.state_dict(), save_path)
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+
+                file_name = f'val{val_loss:0.4f}_train{train_loss:0.4f}_epoch{epoch+1}'
+                save_path = Path(rundir) / fname / file_name
+                torch.save(model.state_dict(), save_path)
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -59,19 +68,20 @@ def get_parser():
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--max_patience', default=5, type=int)
     parser.add_argument('--factor', default=0.3, type=float)
+    parser.add_argument('--dataset', default=0, type=int)
     return parser
 
 if __name__ == '__main__':
     args = get_parser().parse_args()
-    
+
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     if args.gpu:
         torch.cuda.manual_seed_all(args.seed)
 
     os.makedirs(args.rundir, exist_ok=True)
-    
+
     with open(Path(args.rundir) / 'args.json', 'w') as out:
         json.dump(vars(args), out, indent=4)
 
-    train(args.rundir, args.diagnosis, args.epochs, args.learning_rate, args.gpu)
+    train(args.rundir, args.diagnosis, args.dataset, args.epochs, args.learning_rate, args.gpu)

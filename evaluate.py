@@ -7,7 +7,7 @@ import torch
 from sklearn import metrics
 from torch.autograd import Variable
 
-from loader import load_data
+from loader import external_load_data, mr_load_data
 from model import MRNet
 
 def get_parser():
@@ -35,7 +35,7 @@ def run_model(model, loader, train=False, optimizer=None):
             optimizer.zero_grad()
 
         vol, label = batch
-        if loader.dataset.use_gpu:
+        if hasattr(loader.dataset, 'use_gpu') and loader.dataset.use_gpu:
             vol = vol.cuda()
             label = label.cuda()
         vol = Variable(vol)
@@ -66,7 +66,7 @@ def run_model(model, loader, train=False, optimizer=None):
     return avg_loss, auc, preds, labels
 
 def evaluate(split, model_path, diagnosis, use_gpu):
-    train_loader, valid_loader, test_loader = load_data(diagnosis, use_gpu)
+    train_loader, valid_loader, test_loader = external_load_data(diagnosis, use_gpu)
 
     model = MRNet()
     state_dict = torch.load(model_path, map_location=(None if use_gpu else 'cpu'))

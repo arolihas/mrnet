@@ -1,10 +1,18 @@
+import numpy as np
+from tqdm import tqdm_notebook
+from PIL import Image
+from loader import Dataset
+
+import os
+import shutil
 import sys
 sys.path.append('../../mrnet')
 
 import torch
+import torch.nn.functional as F
+import cv2
+from torchvision import models, transforms
 import model
-from dataloader import MRDataset
-from tqdm import tqdm_notebook
 
 task = 'acl'
 plane = 'sagittal'
@@ -23,7 +31,7 @@ mrnet = mrnet.to(device)
 
 _ = mrnet.eval()
 
-dataset = MRDataset('../data/', 
+dataset = Dataset('../data/', 
                     task, 
                     plane, 
                     transform=None, 
