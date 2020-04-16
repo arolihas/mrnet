@@ -38,7 +38,7 @@ class MRNet(nn.Module):
             x = torch.max(x, 0, keepdim=True)[0]
             x = self.classifier(x)
 
-        print("done")
+        #print("done")
         return x
 
 class Attention(nn.Module):
