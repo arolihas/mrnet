@@ -13,15 +13,20 @@ class MRNet(nn.Module):
         self.useMultiHead = useMultiHead
         self.gap = nn.AdaptiveAvgPool2d(1)
         if useMultiHead:
+            self.max_layers = max_layers
+            self.posEmbedLayer = nn.Embedding(max_layers, hidden_dim)
             self.attention = Attention(num_sublayers, num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v)
             self.classifier = nn.Linear(256 * max_layers, 1)
-            self.max_layers = max_layers
 
     def forward(self, x):
         x = torch.squeeze(x, dim=0) # only batch size 1 supported
         x = self.model.features(x)
         x = self.gap(x).view(x.size(0), -1)
+
         if self.useMultiHead:
+
+            positions = torch.tensor(range(self.max_layers))
+            posEmbeddings = self.posEmbedLayer(positions).view(self.max_layers, 1, -1)
 
             x = x.view(x.size(0), 1, -1)
 
@@ -32,12 +37,13 @@ class MRNet(nn.Module):
                 newX[: x.size(0), :, :] = x
                 x = newX
 
+            x = x + posEmbeddings
+
             x = self.attention(x).view(1, -1)
             x = self.classifier(x)
         else:
             x = torch.max(x, 0, keepdim=True)[0]
             x = self.classifier(x)
-
         print("done")
         return x
 
