@@ -55,8 +55,11 @@ def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
 
                 file_name = f'val{val_loss:0.4f}_train{train_loss:0.4f}_epoch{epoch+1}'
                 save_path = Path(rundir) / fname / file_name
-                torch.save(model.state_dict(), save_path)
-
+                try:
+                    torch.save(model.state_dict(), save_path)
+                except:
+                    os.makedirs(rundir+'/'+fname)
+                    torch.save(model.state_dict(), save_path)
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--rundir', type=str, required=True)

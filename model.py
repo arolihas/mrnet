@@ -44,7 +44,7 @@ class MRNet(nn.Module):
         else:
             x = torch.max(x, 0, keepdim=True)[0]
             x = self.classifier(x)
-        print("done")
+
         return x
 
 class Attention(nn.Module):
