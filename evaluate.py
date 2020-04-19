@@ -35,11 +35,12 @@ def run_model(model, loader, train=False, optimizer=None):
             optimizer.zero_grad()
 
         vol, label = batch
-        if hasattr(loader.dataset, 'use_gpu') and loader.dataset.use_gpu:
-            vol = vol.cuda()
-            label = label.cuda()
         vol = Variable(vol)
         label = Variable(label)
+        if loader.dataset.use_gpu:
+            vol = vol.cuda()
+            label = label.cuda()
+            model = model.cuda()
 
         logit = model.forward(vol)
 

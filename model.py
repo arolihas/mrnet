@@ -15,7 +15,7 @@ class MRNet(nn.Module):
         if useMultiHead:
             self.max_layers = max_layers
             self.posEmbedLayer = nn.Embedding(max_layers, hidden_dim)
-            self.attention = Attention(num_sublayers, num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v)
+            self.attention = Attention(num_sublayers, num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v).cuda()
             self.classifier = nn.Linear(256 * max_layers, 1)
 
     def forward(self, x):
@@ -24,8 +24,8 @@ class MRNet(nn.Module):
         x = self.gap(x).view(x.size(0), -1)
 
         if self.useMultiHead:
-
-            positions = torch.tensor(range(self.max_layers))
+            # made this cuda-only I guess?
+            positions = torch.tensor(range(self.max_layers)).cuda()
             posEmbeddings = self.posEmbedLayer(positions).view(self.max_layers, 1, -1)
 
             x = x.view(x.size(0), 1, -1)
@@ -33,10 +33,10 @@ class MRNet(nn.Module):
             if x.size(0) < self.max_layers:
                 newShape = list(x.shape)
                 newShape[0] = self.max_layers
-                newX = torch.zeros(newShape)
+                # Other cuda mod
+                newX = torch.zeros(newShape).cuda()
                 newX[: x.size(0), :, :] = x
                 x = newX
-
             x = x + posEmbeddings
 
             x = self.attention(x).view(1, -1)
@@ -52,7 +52,7 @@ class Attention(nn.Module):
         super().__init__()
         self.num_sublayers = num_sublayers
         self.layers = [MultiheadedAttentionSubLayer
-                       (num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v) for i in range(num_sublayers)]
+                       (num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v).cuda() for i in range(num_sublayers)]
 
     def forward(self, x):
         for i in range(self.num_sublayers):

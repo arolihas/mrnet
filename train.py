@@ -18,7 +18,7 @@ def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
         train_loader, valid_loader, test_loader = external_load_data(diagnosis, use_gpu)
         models.append((MRNet(), train_loader, valid_loader, 'external_validation'))
     elif (dataset == 1):
-        train_loaders, valid_loaders = mr_load_data(diagnosis)
+        train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu)
         train_loader_sag, train_loader_ax, train_loader_cor = train_loaders
         valid_loader_sag, valid_loader_ax, valid_loader_cor = valid_loaders
         models = [(MRNet(max_layers=51), train_loader_sag, valid_loader_sag, 'sagittal'),
