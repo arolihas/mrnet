@@ -1,16 +1,46 @@
-External Validation 	External Validation
-Abnormality	    	Tear                
+External Validationb
+Attention Model Abnormality	  
 
-valid loss: 0.1518  	valid loss: 0.0262  
-valid AUC: 0.8725   	valid AUC: 0.9029  
-     
-train loss: 0.0757  	train loss: 0.0241  
-train AUC: 0.9999   	train AUC: 0.9919  
-       
-test loss: 0.2148   	test loss: 0.0714  
-test AUC: 0.8088    	test AUC: 0.7868   
+valid loss: 0.1518
+valid AUC: 0.8725   
+train loss: 0.0757 
+train AUC: 0.9999 
+test loss: 0.2148
+test AUC: 0.8088
 
-MRNet Abnormality Result
+External Validation
+Original Model Abnormality
+
+valid loss: 0.1600
+valid AUC: 0.8513
+train loss: 0.0594
+train AUC: 0.9997
+test loss: 0.1657
+test AUC: 0.8922
+
+External Validation
+Attention Model Tear                
+
+valid loss: 0.0262
+valid AUC: 0.9029
+train loss: 0.0757
+train AUC: 0.9919
+test loss: 0.0714
+test AUC: 0.7868
+
+External Validation
+Original Model Tear
+
+valid loss: 0.0239
+valid AUC: 0.9171
+train loss: 0.0124
+train AUC: 0.9998
+test loss: 0.0585
+test AUC: 0.8692
+
+MRNet Data
+Attention Abnormality Result 
+
 sagittal valid loss: 0.2324
 sagittal valid AUC: 0.8362
 axial valid loss: 0.1518
@@ -25,8 +55,26 @@ coronal valid AUC: 0.9217
 
 avg / total       0.65      0.81      0.72      1130
 
+MRNet Data
+Original Abnormality Result
 
-MRNet ACL Result
+sagittal valid loss: 0.0009
+sagittal valid AUC: 1.0000
+axial valid loss: 0.0013
+axial valid AUC: 1.0000
+coronal valid loss: 0.0013
+coronal valid AUC: 1.0000
+0.5151952594626517
+             precision    recall  f1-score   support
+
+    class 0       0.22      0.22      0.22       217
+    class 1       0.81      0.81      0.81       913
+
+avg / total       0.70      0.70      0.70      1130
+
+MRNet Data
+Attention ACL Result
+
 sagittal valid loss: 0.2001
 sagittal valid AUC: 0.6777
 axial valid loss: 0.1369
@@ -41,7 +89,27 @@ coronal valid AUC: 0.8180
 
 avg / total       0.70      0.78      0.73      1130
 
-MRNet MCL Result
+
+MRNet Data
+Original ACL Result
+
+sagittal valid loss: 0.0010
+sagittal valid AUC: 1.0000
+axial valid loss: 0.0014
+axial valid AUC: 1.0000
+coronal valid loss: 0.0014
+coronal valid AUC: 1.0000
+0.5021014099783081
+             precision    recall  f1-score   support
+
+    class 0       0.82      0.82      0.82       922
+    class 1       0.19      0.19      0.19       208
+
+avg / total       0.70      0.70      0.70      1130
+
+
+MRNet Data
+Attention MCL Result
 sagittal valid loss: 0.5356
 sagittal valid AUC: 0.7581
 axial valid loss: 0.3225
@@ -55,4 +123,23 @@ coronal valid AUC: 0.8721
     class 1       0.35      0.37      0.36       397
 
 avg / total       0.55      0.54      0.54      1130
+
+
+MRNet Data
+Original MCL Result
+
+sagittal valid loss: 0.0018
+sagittal valid AUC: 1.0000
+axial valid loss: 0.0021
+axial valid AUC: 1.0000
+coronal valid loss: 0.0020
+coronal valid AUC: 1.0000
+0.4913075900082817
+             precision    recall  f1-score   support
+
+    class 0       0.64      0.64      0.64       733
+    class 1       0.34      0.34      0.34       397
+
+avg / total       0.54      0.54      0.54      1130
+
 

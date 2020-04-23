@@ -115,11 +115,13 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         model_path_sag = path_s[ps.index(epoch_sag)]
         model_path_ax = path_a[pa.index(epoch_ax)]
         model_path_cor = path_c[pc.index(epoch_cor)]
+        
+        print("{} {} {}".format(model_path_sag, model_path_ax, model_path_cor))
 
         state_dict_sag = torch.load(model_path + '/sagittal/' + model_path_sag, map_location=(None if use_gpu else 'cpu'))
         state_dict_ax = torch.load(model_path + '/axial/' + model_path_ax, map_location=(None if use_gpu else 'cpu'))
         state_dict_cor = torch.load(model_path + '/coronal/' + model_path_cor, map_location=(None if use_gpu else 'cpu'))
-        
+
         model_sag.load_state_dict(state_dict_sag)
         model_ax.load_state_dict(state_dict_ax)
         model_cor.load_state_dict(state_dict_cor)

@@ -28,6 +28,7 @@ Dataset 1 is the original MRNet Dataset used by Stanford Machine Learning Group
 
 `python evaluate.py --split [train/valid/test] --diagnosis 0 --model_path [experiment-name]/[val_loss]_[train_loss]_epoch[epoch_num] --dataset 0 --gpu`
 
-python evaluate.py --split [train/valid] --diagnosis 0 --model_path [experiment-name] --dataset 1 --gpu
+`python evaluate.py --split [train/valid] --diagnosis 0 --model_path [experiment-name] --dataset 1 --gpu`
+
 
 - prints loss & AUC

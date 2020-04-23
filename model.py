@@ -5,7 +5,7 @@ import math
 from torchvision import models
 
 class MRNet(nn.Module):
-    def __init__(self, useMultiHead = True, num_sublayers = 2, num_heads = 8,
+    def __init__(self, useMultiHead = False, num_sublayers = 2, num_heads = 8,
                  hidden_dim = 256, dim_feedforward = 512, dim_kq = None, dim_v = None, max_layers = 45):
         super().__init__()
         self.model = models.alexnet(pretrained=True)
