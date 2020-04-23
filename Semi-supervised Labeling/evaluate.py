@@ -4,7 +4,6 @@ import os
 import numpy as np
 import torch
 
-from sklearn import metrics
 from torch.autograd import Variable
 
 from loader import mr_load_data
