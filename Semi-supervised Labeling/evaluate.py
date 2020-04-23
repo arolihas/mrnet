@@ -30,7 +30,7 @@ def run_model(model, loader, train=False, optimizer=None):
     for batch in loader:
 
         vol, label = batch
-        print(str(batch.shape) + "   ---  "  + str(label[0][0]))
+        print(str(vol.shape) + "   ---  "  + str(label[0][0]))
         num_batches += 1
         print(num_batches)
         continue
