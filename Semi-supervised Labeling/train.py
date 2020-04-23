@@ -6,7 +6,6 @@ import torch
 
 from datetime import datetime
 from pathlib import Path
-from sklearn import metrics
 
 from evaluate import run_model
 from loader import mr_load_data
