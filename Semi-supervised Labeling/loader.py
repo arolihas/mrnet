@@ -15,7 +15,7 @@ STDDEV = 49.73
 MRPATH = '../mrnet_data/'
 
 class MRDataset(data.Dataset):
-    def __init__(self, train=True, use_gpu=True, transform=None, weights=None):
+    def __init__(self, train=True, use_gpu=False, transform=None, weights=None):
         super().__init__()
 
         self.use_gpu = use_gpu
