@@ -28,6 +28,14 @@ def run_model(model, loader, train=False, optimizer=None):
     num_batches = 0
 
     for batch in loader:
+
+        vol, label = batch
+        print(str(batch.shape) + "   ---  "  + str(label[0][0]))
+        num_batches += 1
+        print(num_batches)
+        continue
+
+
         if train:
             optimizer.zero_grad()
 
@@ -49,15 +57,12 @@ def run_model(model, loader, train=False, optimizer=None):
         if train:
             loss.backward()
             optimizer.step()
-        num_batches += 1
 
         pred_npy = pred.data.cpu().numpy()
         label_npy = label.data.cpu().numpy()
 
         preds.append(pred_npy)
         labels.append(label_npy)
-
-        print(num_batches)
 
     avg_loss = total_loss / num_batches
 
