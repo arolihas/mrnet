@@ -32,11 +32,15 @@ def run_model(model, loader, train=False, optimizer=None):
             optimizer.zero_grad()
 
         vol, label = batch
-        if hasattr(loader.dataset, 'use_gpu') and loader.dataset.use_gpu:
-            vol = vol.cuda()
-            label = label.cuda()
         vol = Variable(vol)
         label = Variable(label)
+
+        if loader.dataset.use_gpu:
+            vol = vol.cuda()
+            label = label.cuda()
+            model = model.cuda()
+
+
         pred = model.forward(vol)
 
         loss = loader.dataset.weighted_loss(pred, label)
@@ -52,6 +56,8 @@ def run_model(model, loader, train=False, optimizer=None):
 
         preds.append(pred_npy)
         labels.append(label_npy)
+
+        print(num_batches)
 
     avg_loss = total_loss / num_batches
 
