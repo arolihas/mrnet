@@ -38,12 +38,12 @@ class MRDataset(data.Dataset):
         folder = self.folder_path + "sagittal/"
         self.paths_C = [folder + filename for filename in os.listdir(folder) if ".npy" in filename]
 
-        self.paths += self.paths_A[:10]
-        self.labels += [0 for i in range(10)]#len(self.paths_A))]
-        self.paths += self.paths_C[:10]
-        self.labels += [1 for i in range(10)]#len(self.paths_A))]
-        self.paths += self.paths_S[:10]
-        self.labels += [2 for i in range(10)]#len(self.paths_A))]
+        self.paths += self.paths_A
+        self.labels += [0 for i in range(len(self.paths_A))]
+        self.paths += self.paths_C
+        self.labels += [1 for i in range(len(self.paths_C))]
+        self.paths += self.paths_S
+        self.labels += [2 for i in range(len(self.paths_C))]
 
 
         self.transform = transform
