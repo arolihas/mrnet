@@ -19,7 +19,7 @@ class MRNet(nn.Module):
             self.classifier = nn.Linear(256 * max_layers, 1)
 
     def forward(self, x):
-        print(x.shape)
+        #print(x.shape)
         x = torch.squeeze(x, dim=0) # only batch size 1 supported
         x = self.model.features(x)
         x = self.gap(x).view(x.size(0), -1)

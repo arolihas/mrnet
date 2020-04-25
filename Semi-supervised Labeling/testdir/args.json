@@ -1,6 +1,6 @@
 {
     "rundir": "testdir",
-    "seed": 42,
+    "seed": 242,
     "gpu": false,
     "learning_rate": 1e-05,
     "weight_decay": 0.01,

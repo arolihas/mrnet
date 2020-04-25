@@ -21,7 +21,9 @@ def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
         train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu)
         train_loader_sag, train_loader_ax, train_loader_cor = train_loaders
         valid_loader_sag, valid_loader_ax, valid_loader_cor = valid_loaders
-        models = [(MRNet(max_layers=51), train_loader_sag, valid_loader_sag, 'sagittal'), (MRNet(max_layers=61), train_loader_ax, valid_loader_ax, 'axial'),(MRNet(max_layers=58), train_loader_cor, valid_loader_cor, 'coronal')]
+        models = [(MRNet(max_layers=51), train_loader_sag, valid_loader_sag, 'sagittal'),
+                  (MRNet(max_layers=61),train_loader_ax, valid_loader_ax, 'axial'),
+                  (MRNet(max_layers=58), train_loader_cor, valid_loader_cor, 'coronal')]
 
     for model, train_loader, valid_loader, fname in models:
         if use_gpu:

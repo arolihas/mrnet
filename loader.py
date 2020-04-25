@@ -167,7 +167,7 @@ def external_load_data(diagnosis, use_gpu=False):
 
     return train_loader, valid_loader, test_loader
 
-def mr_load_data(task, use_gpu):
+def mr_load_data(task, use_gpu, train_shuffle = True):
 
     train_loaders = []
     valid_loaders = []
@@ -176,7 +176,7 @@ def mr_load_data(task, use_gpu):
         train_dataset = MRDataset(task, plane, use_gpu)
         valid_dataset = MRDataset(task, plane, use_gpu)
 
-        train_loader = data.DataLoader(train_dataset, batch_size=1, num_workers=8, shuffle=True)
+        train_loader = data.DataLoader(train_dataset, batch_size=1, num_workers=8, shuffle=train_shuffle)
         valid_loader = data.DataLoader(valid_dataset, batch_size=1, num_workers=8, shuffle=False)
 
         train_loaders.append(train_loader)

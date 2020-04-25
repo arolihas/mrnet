@@ -31,7 +31,8 @@ def run_model(model, loader, train=False, optimizer=None):
 
     total_loss = 0.
     num_batches = 0
-
+       
+    tot_batch, percent, step = len([t for t in loader]), 0.0, .05
     for batch in loader:
         if train:
             optimizer.zero_grad()
@@ -60,6 +61,10 @@ def run_model(model, loader, train=False, optimizer=None):
             loss.backward()
             optimizer.step()
         num_batches += 1
+        print(float(num_batches)/tot_batches)
+        if float(num_batches)/tot_batches > percent:
+            print(f"{percent} ", end="")
+            percent+=step
 
     avg_loss = total_loss / num_batches
 
@@ -94,7 +99,7 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         print(f'{split} AUC: {auc:0.4f}')
                 
     if dataset == 1:
-        train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu)
+        train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu, train_shuffle = False)
         
         model_sag = MRNet(max_layers=51)
         model_ax = MRNet(max_layers=61)
@@ -104,17 +109,13 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         path_a = os.listdir(model_path + '/axial')
         path_c = os.listdir(model_path + '/coronal')
 
-        ps = [0 if 'h' in x[-2:] else int(x[-2:]) for x in path_s]
-        pa = [0 if 'h' in x[-2:] else int(x[-2:]) for x in path_a]
-        pc = [0 if 'h' in x[-2:] else int(x[-2:]) for x in path_c]
+        ps = [int(x.split("epoch")[1]) for x in path_s]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_s]
+        pa = [int(x.split("epoch")[1]) for x in path_a]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_a]
+        pc = [int(x.split("epoch")[1]) for x in path_c]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_c]
 
-        epoch_sag = max(ps)
-        epoch_ax= max(pa)
-        epoch_cor = max(pc)
-
-        model_path_sag = path_s[ps.index(epoch_sag)]
-        model_path_ax = path_a[pa.index(epoch_ax)]
-        model_path_cor = path_c[pc.index(epoch_cor)]
+        model_path_sag = path_s[ps.index(max(ps))]
+        model_path_ax = path_a[pa.index(max(pa))]
+        model_path_cor = path_c[pc.index(max(pc))]
         
         print("{} {} {}".format(model_path_sag, model_path_ax, model_path_cor))
 
@@ -158,7 +159,7 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         X_valid[:, 1] = preds_ax
         X_valid[:, 2] = preds_cor
 
-        y_preds = lgr.predict(X)
+        y_preds = lgr.predict(X_valid)
         y_true = np.array(valid_labels)
         print(metrics.roc_auc_score(y_true, y_preds))
         print(metrics.classification_report(y_true, y_preds, target_names=['class 0', 'class 1']))
