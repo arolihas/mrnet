@@ -3,6 +3,7 @@ import json
 import numpy as np
 import os
 import torch
+import glob
 
 from datetime import datetime
 from pathlib import Path
@@ -12,11 +13,11 @@ from evaluate import run_model
 from loader import external_load_data, mr_load_data
 from model import MRNet
 
-def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
+def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu, attention):
     models = []
     if (dataset == 0):
         train_loader, valid_loader, test_loader = external_load_data(diagnosis, use_gpu)
-        models.append((MRNet(), train_loader, valid_loader, 'external_validation'))
+        models.append((MRNet(useMultiHead = attention), train_loader, valid_loader, 'external_validation'))
     elif (dataset == 1):
         train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu)
         train_loader_sag, train_loader_ax, train_loader_cor = train_loaders
@@ -55,11 +56,14 @@ def train(rundir, diagnosis, dataset, epochs, learning_rate, use_gpu):
 
                 file_name = f'val{val_loss:0.4f}_train{train_loss:0.4f}_epoch{epoch+1}'
                 save_path = Path(rundir) / fname / file_name
+                folder = rundir + '/' + fname
                 try:
-                    torch.save(model.state_dict(), save_path)
+                    for f in os.listdir(folder):
+                        os.remove(folder + '/' + f)
+                    torch.save(model, save_path)
                 except:
                     os.makedirs(rundir+'/'+fname)
-                    torch.save(model.state_dict(), save_path)
+                    torch.save(model, save_path)
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--rundir', type=str, required=True)
@@ -72,6 +76,7 @@ def get_parser():
     parser.add_argument('--max_patience', default=5, type=int)
     parser.add_argument('--factor', default=0.3, type=float)
     parser.add_argument('--dataset', default=0, type=int)
+    parser.add_argument('--attention', action='store_true')
     return parser
 
 if __name__ == '__main__':
@@ -87,4 +92,4 @@ if __name__ == '__main__':
     with open(Path(args.rundir) / 'args.json', 'w') as out:
         json.dump(vars(args), out, indent=4)
 
-    train(args.rundir, args.diagnosis, args.dataset, args.epochs, args.learning_rate, args.gpu)
+    train(args.rundir, args.diagnosis, args.dataset, args.epochs, args.learning_rate, args.gpu, args.attention)
