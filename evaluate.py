@@ -31,8 +31,8 @@ def run_model(model, loader, train=False, optimizer=None):
 
     total_loss = 0.
     num_batches = 0
-       
-    tot_batch, percent, step = len([t for t in loader]), 0.0, .05
+
+    tot_batches, percent, step = len([t for t in loader]), 0.0, .05
     for batch in loader:
         if train:
             optimizer.zero_grad()
@@ -97,14 +97,14 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
 
         print(f'{split} loss: {loss:0.4f}')
         print(f'{split} AUC: {auc:0.4f}')
-                
+
     if dataset == 1:
         train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu, train_shuffle = False)
-        
+
         model_sag = MRNet(max_layers=51)
         model_ax = MRNet(max_layers=61)
         model_cor = MRNet(max_layers=58)
-        
+
         path_s = os.listdir(model_path + '/sagittal')
         path_a = os.listdir(model_path + '/axial')
         path_c = os.listdir(model_path + '/coronal')
@@ -116,7 +116,7 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         model_path_sag = path_s[ps.index(max(ps))]
         model_path_ax = path_a[pa.index(max(pa))]
         model_path_cor = path_c[pc.index(max(pc))]
-        
+
         print("{} {} {}".format(model_path_sag, model_path_ax, model_path_cor))
 
         state_dict_sag = torch.load(model_path + '/sagittal/' + model_path_sag, map_location=(None if use_gpu else 'cpu'))
@@ -144,7 +144,7 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         _, _, preds_cor, valid_labels = run_model(model_cor, valid_loaders[2])
         print(f'coronal {split} loss: {loss_cor:0.4f}')
         print(f'coronal {split} AUC: {auc_cor:0.4f}')
-        
+
         X = np.zeros((len(t_preds_cor), 3))
         X[:, 0] = t_preds_sag
         X[:, 1] = t_preds_ax

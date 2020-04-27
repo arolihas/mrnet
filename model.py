@@ -5,7 +5,7 @@ import math
 from torchvision import models
 
 class MRNet(nn.Module):
-    def __init__(self, useMultiHead = False, num_sublayers = 2, num_heads = 8,
+    def __init__(self, useMultiHead = True, num_sublayers = 2, num_heads = 8,
                  hidden_dim = 256, dim_feedforward = 512, dim_kq = None, dim_v = None, max_layers=110):
         super().__init__()
         self.useMultiHead = useMultiHead
@@ -13,8 +13,11 @@ class MRNet(nn.Module):
         self.classifier = nn.Linear(256, 1)
         self.gap = nn.AdaptiveAvgPool2d(1)
         if useMultiHead:
+            print("Using Multiheaded Attention")
             self.posEmbedLayer = nn.Embedding(max_layers, hidden_dim)
             self.attention = Attention(num_sublayers, num_heads, hidden_dim, dim_feedforward, dim_kq, dim_v).cuda()
+        else:
+            print("Not using Multiheaded Attention")
 
     def forward(self, x):
         x = torch.squeeze(x, dim=0) # only batch size 1 supported
@@ -29,15 +32,13 @@ class MRNet(nn.Module):
             x = x.view(x.size(0), 1, -1)
             x = x + posEmbeddings
 
-            x = self.attention(x).view(1, -1)
-            x = torch.sum(x, 0, keepdim=True)/x.size(0)
+            x = self.attention(x)
+            x = torch.sum(x, 0, keepdim=True)[0]/x.size(0)
 
         else:
-
             x = torch.max(x, 0, keepdim=True)[0]
 
         x = self.classifier(x)
-        print(x)
         return x
 
 class Attention(nn.Module):
