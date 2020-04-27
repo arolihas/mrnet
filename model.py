@@ -5,7 +5,7 @@ import math
 from torchvision import models
 
 class MRNet(nn.Module):
-    def __init__(self, useMultiHead = True, num_sublayers = 2, num_heads = 8,
+    def __init__(self, useMultiHead=True, num_sublayers = 2, num_heads = 8,
                  hidden_dim = 256, dim_feedforward = 512, dim_kq = None, dim_v = None, max_layers=110):
         super().__init__()
         self.useMultiHead = useMultiHead
@@ -26,6 +26,7 @@ class MRNet(nn.Module):
 
         if self.useMultiHead:
             # made this cuda-only I guess?
+
             positions = torch.tensor(range(x.size(0))).cuda()
             posEmbeddings = self.posEmbedLayer(positions).view(x.size(0), 1, -1)
 
@@ -86,4 +87,5 @@ class MultiheadedAttentionSubLayer(nn.Module):
     def forward(self, x):
         x = self.multi_head_attention(x)
         x = self.feedforward_layer(x)
+
         return x
