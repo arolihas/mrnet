@@ -18,6 +18,7 @@ def get_parser():
     parser.add_argument('--diagnosis', type=int, required=True)
     parser.add_argument('--dataset', type=int, required=True)
     parser.add_argument('--gpu', action='store_true')
+    parser.add_argument('--attention', action='store_true')
     return parser
 
 def run_model(model, loader, train=False, optimizer=None):
@@ -32,7 +33,7 @@ def run_model(model, loader, train=False, optimizer=None):
     total_loss = 0.
     num_batches = 0
 
-    tot_batches, percent, step = len([t for t in loader]), 0.0, .05
+    tot_batch, percent, step = len(loader), 0.0, .05
     for batch in loader:
         if train:
             optimizer.zero_grad()
@@ -61,9 +62,8 @@ def run_model(model, loader, train=False, optimizer=None):
             loss.backward()
             optimizer.step()
         num_batches += 1
-        print(float(num_batches)/tot_batches)
-        if float(num_batches)/tot_batches > percent:
-            print(f"{percent} ", end="")
+        if float(num_batches)/tot_batch > percent:
+            #print(f"{str(percent)[:4]} ", end="")
             percent+=step
 
     avg_loss = total_loss / num_batches
@@ -73,14 +73,15 @@ def run_model(model, loader, train=False, optimizer=None):
 
     return avg_loss, auc, preds, labels
 
-def evaluate(split, model_path, diagnosis, dataset, use_gpu):
+def evaluate(split, model_path, diagnosis, dataset, use_gpu, attention):
     preds = None
     labels = None
     if dataset == 0:
         train_loader, valid_loader, test_loader = external_load_data(diagnosis, use_gpu)
-        model = MRNet()
-        state_dict = torch.load(model_path, map_location=(None if use_gpu else 'cpu'))
-        model.load_state_dict(state_dict)
+        #model = MRNet(useMultiHead = attention)
+        #state_dict = torch.load(model_path, map_location=(None if use_gpu else 'cpu'))
+        #model.load_state_dict(state_dict)
+        model = torch.load(model_path)
         if use_gpu:
             model = model.cuda()
 
@@ -99,19 +100,15 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         print(f'{split} AUC: {auc:0.4f}')
 
     if dataset == 1:
-        train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu, train_shuffle = False)
-
-        model_sag = MRNet(max_layers=51)
-        model_ax = MRNet(max_layers=61)
-        model_cor = MRNet(max_layers=58)
+        train_loaders, valid_loaders = mr_load_data(diagnosis, use_gpu, train_shuffle = True)
 
         path_s = os.listdir(model_path + '/sagittal')
         path_a = os.listdir(model_path + '/axial')
         path_c = os.listdir(model_path + '/coronal')
 
-        ps = [int(x.split("epoch")[1]) for x in path_s]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_s]
-        pa = [int(x.split("epoch")[1]) for x in path_a]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_a]
-        pc = [int(x.split("epoch")[1]) for x in path_c]#[0 if 'h' in x[-2:] else int(x[-2:]) for x in path_c]
+        ps = [int(x.split("epoch")[1]) for x in path_s]
+        pa = [int(x.split("epoch")[1]) for x in path_a]
+        pc = [int(x.split("epoch")[1]) for x in path_c]
 
         model_path_sag = path_s[ps.index(max(ps))]
         model_path_ax = path_a[pa.index(max(pa))]
@@ -123,9 +120,16 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
         state_dict_ax = torch.load(model_path + '/axial/' + model_path_ax, map_location=(None if use_gpu else 'cpu'))
         state_dict_cor = torch.load(model_path + '/coronal/' + model_path_cor, map_location=(None if use_gpu else 'cpu'))
 
+        model_sag = MRNet(useMultiHead=attention, max_layers=51)
         model_sag.load_state_dict(state_dict_sag)
+        model_ax = MRNet(useMultiHead=attention, max_layers=61)
         model_ax.load_state_dict(state_dict_ax)
+        model_cor = MRNet(useMultiHead=attention, max_layers=58)
         model_cor.load_state_dict(state_dict_cor)
+
+        #model_sag = torch.load(model_path + '/sagittal/' + model_path_sag)
+        #model_ax = torch.load(model_path + '/axial/' + model_path_ax)
+        #model_cor = torch.load(model_path + '/coronal/' + model_path_cor)
 
         if use_gpu:
             model_sag = model_sag.cuda()
@@ -168,4 +172,4 @@ def evaluate(split, model_path, diagnosis, dataset, use_gpu):
 
 if __name__ == '__main__':
     args = get_parser().parse_args()
-    evaluate(args.split, args.model_path, args.diagnosis, args.dataset, args.gpu)
+    evaluate(args.split, args.model_path, args.diagnosis, args.dataset, args.gpu, args.attention)

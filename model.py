@@ -86,5 +86,4 @@ class MultiheadedAttentionSubLayer(nn.Module):
     def forward(self, x):
         x = self.multi_head_attention(x)
         x = self.feedforward_layer(x)
-
         return x
